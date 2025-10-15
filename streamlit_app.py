@@ -1,6 +1,8 @@
 import streamlit as st
 import pandas as pd
 
+st.image("images.jpg", use_container_width=True)
+
 st.title("✈️ Flight Price Prediction")
 st.link_button("Github Repo", "https://github.com/johnlamair/flightprice-midterm1")
 
