@@ -1,12 +1,13 @@
 import streamlit as st
 
-st.title("🎈 Flight Price Prediction")
+st.title("✈️ Flight Price Prediction")
+
+st.markdown("### Objectives")
 st.write(
-    "Body paragraph - James Zafiros"
+    "Our goal is to predict the price of flights based off of multiple variables."
 )
+
+st.markdown("### Dataset")
 st.write(
-    "Body paragraph - John LaMair"
-)
-st.write(
-    "Body paragraph - Rahul"
+    "This is our dataset."
 )
