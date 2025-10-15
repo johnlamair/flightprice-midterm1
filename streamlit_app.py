@@ -10,5 +10,9 @@ st.write(
 
 st.markdown("### Dataset")
 st.write(
-    "This is our dataset."
+    "Dataset contains information about flight booking options from the website Easemytrip for flight travel between India's top 6 metro cities. There are 300261 datapoints and 11 features in the cleaned dataset."
+)
+
+st.write(
+    "Source: https://www.kaggle.com/datasets/shubhambathwal/flight-price-prediction?resource=download"
 )
