@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 
 st.title("✈️ Flight Price Prediction")
+st.link_button("Github Repo", "https://github.com/johnlamair/flightprice-midterm1")
 
 st.markdown("### Objectives")
 st.write(
