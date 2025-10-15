@@ -4,3 +4,6 @@ st.title("🎈 Flight Price Prediction")
 st.write(
     "Body paragraph - James Zafiros"
 )
+st.write(
+    "Body paragraph - John LaMair"
+)
