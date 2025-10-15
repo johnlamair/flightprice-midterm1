@@ -2,5 +2,5 @@ import streamlit as st
 
 st.title("🎈 Flight Price Prediction")
 st.write(
-    "Body paragraph"
+    "Body paragraph - James Zafiros"
 )
