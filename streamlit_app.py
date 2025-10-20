@@ -131,50 +131,56 @@ elif page == "Visualization 📊":
                 plt.close()
 
 elif page == "Prediction":
-    st.subheader("Prediction")
-
     # Encode categorical columns as integers
-    df_prediction["airline"] = df_prediction["airline"].astype("category").cat.codes
-    df_prediction["flight"] = df_prediction["flight"].astype("category").cat.codes
-    df_prediction["source_city"] = df_prediction["source_city"].astype("category").cat.codes
-    df_prediction["departure_time"] = df_prediction["departure_time"].astype("category").cat.codes
-    df_prediction["stops"] = df_prediction["stops"].astype("category").cat.codes
-    df_prediction["arrival_time"] = df_prediction["arrival_time"].astype("category").cat.codes
-    df_prediction["destination_city"] = df_prediction["destination_city"].astype("category").cat.codes
-    df_prediction["class"] = df_prediction["class"].astype("category").cat.codes
+    for col in ["airline", "flight", "source_city", "departure_time",
+                "stops", "arrival_time", "destination_city", "class"]:
+        df_prediction[col] = df_prediction[col].astype("category").cat.codes
 
-    X = df_prediction[["airline", "flight", "source_city", "departure_time",
-                    "stops", "arrival_time", "destination_city", "class",
-                    "duration", "days_left"]]
-    y = df_prediction["price"]
+    # Map original class names to their encoded values
+    class_mapping = dict(zip(df["Class"].astype("category").cat.categories, range(len(df["Class"].astype("category").cat.categories))))
 
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+    # Features and target
+    features = ["airline", "flight", "source_city", "departure_time",
+                "stops", "arrival_time", "destination_city", "class",
+                "duration", "days_left"]
+    target = "price"
 
-    # fit linear regression
-    lr = LinearRegression()
-    lr.fit(X_train, y_train)
+    # Loop over each original class
+    for cls in df["Class"].unique():
+        st.markdown(f"### Flight Class: {cls}")
 
-    # --- Make predictions ---
-    y_pred = lr.predict(X_test)
+        # Get the corresponding encoded value
+        cls_code = class_mapping[cls]
 
-    # --- Metrics ---
-    mae = mean_absolute_error(y_test, y_pred)
-    rmse = np.sqrt(mean_squared_error(y_test, y_pred))
-    r2 = r2_score(y_test, y_pred)
+        # Filter the encoded df_prediction
+        df_class = df_prediction[df_prediction["class"] == cls_code]
 
-    st.subheader("Linear Regression Results")
-    st.write(f"Mean Absolute Error (MAE): ₹{mae:,.2f}")
-    st.write(f"Root Mean Squared Error (RMSE): ₹{rmse:,.2f}")
-    st.write(f"R² Score: {r2:.4f}")
+        if df_class.empty:
+            st.write("No data available for this class.")
+            continue
 
-    # --- Visualization ---
-    st.subheader("Predicted vs Actual Prices")
-    plt.figure(figsize=(10,6))
-    plt.scatter(y_test, y_pred, alpha=0.5, color='blue')
-    plt.plot([y_test.min(), y_test.max()], [y_test.min(), y_test.max()], 'r--', lw=2)
-    plt.xlabel("Actual Price (₹)")
-    plt.ylabel("Predicted Price (₹)")
-    plt.title("Actual vs Predicted Flight Prices")
-    plt.grid(alpha=0.3)
-    st.pyplot(plt)
-    plt.close()
+        X = df_class[features]
+        y = df_class[target]
+
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+        lr = LinearRegression()
+        lr.fit(X_train, y_train)
+        y_pred = lr.predict(X_test)
+
+        # Metrics
+        mae = mean_absolute_error(y_test, y_pred)
+        rmse = np.sqrt(mean_squared_error(y_test, y_pred))
+        r2 = r2_score(y_test, y_pred)
+        st.write(f"**MAE:** ₹{mae:,.2f}  |  **RMSE:** ₹{rmse:,.2f}  |  **R²:** {r2:.4f}")
+
+        # Plot
+        plt.figure(figsize=(8,5))
+        plt.scatter(y_test, y_pred, alpha=0.5, color='blue')
+        plt.plot([y_test.min(), y_test.max()], [y_test.min(), y_test.max()], 'r--', lw=2)
+        plt.xlabel("Actual Price (₹)")
+        plt.ylabel("Predicted Price (₹)")
+        plt.title(f"Actual vs Predicted Prices - {cls} Class")
+        plt.grid(alpha=0.3)
+        st.pyplot(plt)
+        plt.close()
