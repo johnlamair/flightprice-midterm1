@@ -84,6 +84,7 @@ elif page == "Visualization 📊":
                 aggfunc='mean'
             )
 
+            # format price figures
             annot = heatmap_data.applymap(lambda x: f"₹{int(round(x))}" if pd.notnull(x) else "")
 
             plt.figure(figsize=(12, 8))
@@ -121,6 +122,25 @@ elif page == "Visualization 📊":
             plt.grid(axis='y', linestyle='--', alpha=0.6)
             st.pyplot(plt)
             plt.close()
+
+            # --- Box and Whisker Plot (only for Overall tab) ---
+            if name == "Overall":
+                st.subheader("Box and Whisker Plot: Flight Prices by Airline")
+
+                # Map dataset airline values to friendly names
+                reverse_airline_map = {v: k for k, v in airline_map.items()}
+                df_box = df.copy()
+                df_box['Airline'] = df_box['airline'].map(reverse_airline_map)
+
+                fig, ax = plt.subplots(figsize=(10, 6))
+                sns.boxplot(x='Airline', y='price', data=df_box, palette='Set3', ax=ax)
+                ax.set_title('Distribution of Flight Prices per Airline', fontsize=14)
+                ax.set_xlabel('Airline', fontsize=12)
+                ax.set_ylabel('Price (₹)', fontsize=12)
+                plt.xticks(rotation=45)
+
+                st.pyplot(fig)
+                plt.close()
             
 elif page == "Prediction":
     st.subheader("Prediction")
