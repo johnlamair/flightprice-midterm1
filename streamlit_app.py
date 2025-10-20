@@ -100,7 +100,7 @@ elif page == "Visualization 📊":
             df_tab['Departure Time'] = pd.Categorical(df_tab['Departure Time'], categories=departure_order, ordered=True)
             avg_price_by_departure = df_tab.groupby('Departure Time')['Price'].mean().reindex(departure_order)
             plt.figure(figsize=(10,5))
-            plt.bar(avg_price_by_departure.index, avg_price_by_departure.values, color='blue')
+            plt.bar(avg_price_by_departure.index, avg_price_by_departure.values)
             plt.xticks(ticks=range(len(departure_order)), labels=list(departure_time_map.keys()), rotation=45)
             plt.title(f"Average Price by Departure Time ({name})", fontsize=14)
             plt.xlabel("Departure Time")
@@ -115,7 +115,7 @@ elif page == "Visualization 📊":
                 reverse_airline_map = {v: k for k, v in airline_map.items()}
                 df_box['Airline'] = df_box['Airline'].map(reverse_airline_map)
                 fig, ax = plt.subplots(figsize=(10, 6))
-                sns.boxplot(x='Airline', y='Price', data=df_box, palette='Set3', ax=ax)
+                sns.boxplot(x='Airline', y='Price', data=df_box, ax=ax)
                 ax.set_title('Distribution of Flight Prices per Airline', fontsize=14)
                 ax.set_xlabel('Airline', fontsize=12)
                 ax.set_ylabel('Price (₹)', fontsize=12)
