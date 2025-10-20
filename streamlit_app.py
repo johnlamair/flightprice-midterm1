@@ -13,9 +13,6 @@ page = st.sidebar.radio("Select Page", ["Introduction 📘", "Visualization 📊
 st.title("✈️ Flight Price Prediction")
 df = pd.read_csv("flight-price.csv")
 
-# Make a copy of df for prediction preprocessing
-df_prediction = df.copy()
-
 # column names
 df.columns = [
     "Serial Number", "Airline", "Flight", "Source City", "Departure Time",
@@ -62,7 +59,6 @@ if page == "Introduction 📘":
 
 elif page == "Visualization 📊":
     st.subheader("Data Visualization")
-
     tab_names = ["Overall"] + list(airline_map.keys())
     tabs = st.tabs(tab_names)
 
@@ -131,56 +127,81 @@ elif page == "Visualization 📊":
                 plt.close()
 
 elif page == "Prediction":
-    # Encode categorical columns as integers
-    for col in ["airline", "flight", "source_city", "departure_time",
-                "stops", "arrival_time", "destination_city", "class"]:
+    st.subheader("Predictions")
+
+    # Make a copy of df for prediction preprocessing
+    df_prediction = df.copy()
+
+    # Encode all categorical columns
+    categorical_cols = ["Airline", "Flight", "Source City", "Departure Time",
+                        "Stops", "Arrival Time", "Destination City", "Class"]
+    for col in categorical_cols:
         df_prediction[col] = df_prediction[col].astype("category").cat.codes
 
-    # Map original class names to their encoded values
-    class_mapping = dict(zip(df["Class"].astype("category").cat.categories, range(len(df["Class"].astype("category").cat.categories))))
+    # Create mappings for Airline and Class
+    airline_categories = pd.Categorical(df["Airline"])
+    airline_mapping = dict(zip(airline_categories.categories, range(len(airline_categories.categories))))
+
+    class_categories = pd.Categorical(df["Class"])
+    class_mapping = dict(zip(class_categories.categories, range(len(class_categories.categories))))
 
     # Features and target
-    features = ["airline", "flight", "source_city", "departure_time",
-                "stops", "arrival_time", "destination_city", "class",
-                "duration", "days_left"]
-    target = "price"
+    features = ["Airline", "Flight", "Source City", "Departure Time",
+                "Stops", "Arrival Time", "Destination City", "Class",
+                "Duration", "Days Left"]
+    target = "Price"
 
-    # Loop over each original class
-    for cls in df["Class"].unique():
-        st.markdown(f"### Flight Class: {cls}")
+    # Tabs for each airline
+    tab_names = list(airline_mapping.keys())
+    tabs = st.tabs(tab_names)
 
-        # Get the corresponding encoded value
-        cls_code = class_mapping[cls]
+    for tab, airline_name in zip(tabs, tab_names):
+        with tab:
+            st.markdown(f"## Airline: {airline_name}")
 
-        # Filter the encoded df_prediction
-        df_class = df_prediction[df_prediction["class"] == cls_code]
+            airline_code = airline_mapping[airline_name]
+            df_airline = df_prediction[df_prediction["Airline"] == airline_code]
 
-        if df_class.empty:
-            st.write("No data available for this class.")
-            continue
+            # Loop over classes: Business and Economy
+            for cls_name in ["Economy", "Business"]:
+                if cls_name not in class_mapping:
+                    st.write(f"No data available for {cls_name} class.")
+                    continue
 
-        X = df_class[features]
-        y = df_class[target]
+                cls_code = class_mapping[cls_name]
+                df_class = df_airline[df_airline["Class"] == cls_code]
 
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+                if df_class.empty:
+                    st.write(f"No data available for {cls_name} class.")
+                    continue
 
-        lr = LinearRegression()
-        lr.fit(X_train, y_train)
-        y_pred = lr.predict(X_test)
+                st.markdown(f"### Class: {cls_name}")
 
-        # Metrics
-        mae = mean_absolute_error(y_test, y_pred)
-        rmse = np.sqrt(mean_squared_error(y_test, y_pred))
-        r2 = r2_score(y_test, y_pred)
-        st.write(f"**MAE:** ₹{mae:,.2f}  |  **RMSE:** ₹{rmse:,.2f}  |  **R²:** {r2:.4f}")
+                X = df_class[features]
+                y = df_class[target]
 
-        # Plot
-        plt.figure(figsize=(8,5))
-        plt.scatter(y_test, y_pred, alpha=0.5, color='blue')
-        plt.plot([y_test.min(), y_test.max()], [y_test.min(), y_test.max()], 'r--', lw=2)
-        plt.xlabel("Actual Price (₹)")
-        plt.ylabel("Predicted Price (₹)")
-        plt.title(f"Actual vs Predicted Prices - {cls} Class")
-        plt.grid(alpha=0.3)
-        st.pyplot(plt)
-        plt.close()
+                X_train, X_test, y_train, y_test = train_test_split(
+                    X, y, test_size=0.2, random_state=42
+                )
+
+                # Linear Regression
+                lr = LinearRegression()
+                lr.fit(X_train, y_train)
+                y_pred = lr.predict(X_test)
+
+                # Metrics
+                mae = mean_absolute_error(y_test, y_pred)
+                rmse = np.sqrt(mean_squared_error(y_test, y_pred))
+                r2 = r2_score(y_test, y_pred)
+                st.write(f"**MAE:** ₹{mae:,.2f}  |  **RMSE:** ₹{rmse:,.2f}  |  **R²:** {r2:.4f}")
+
+                # Plot actual vs predicted
+                plt.figure(figsize=(8,5))
+                plt.scatter(y_test, y_pred, alpha=0.5, color='blue')
+                plt.plot([y_test.min(), y_test.max()], [y_test.min(), y_test.max()], 'r--', lw=2)
+                plt.xlabel("Actual Price (₹)")
+                plt.ylabel("Predicted Price (₹)")
+                plt.title(f"Actual vs Predicted Prices - {cls_name} Class")
+                plt.grid(alpha=0.3)
+                st.pyplot(plt)
+                plt.close()
