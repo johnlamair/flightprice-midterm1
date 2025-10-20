@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 st.sidebar.title("Pages:")
-page = st.sidebar.selectbox("Select Page",["Introduction 📘","Visualization 📊", "Automated Report 📑","Prediction"])
+page = st.sidebar.radio("Select Page",["Introduction 📘","Visualization 📊", "Automated Report 📑","Prediction"])
 
 
 st.title("✈️ Flight Price Prediction")
@@ -27,7 +27,7 @@ if page == "Introduction 📘":
     )
 
     df.columns = ["Serial Number", "Airline", "Flight", "Source City", "Departure Time", "Stops", "Arrival Time", "Destination City", "Class", "Duration", "Days Left", "Price"]
-    st.dataframe(df.head())
+    st.dataframe(df.head(), hide_index=True)
 
     st.write(
         "Source: https://www.kaggle.com/datasets/shubhambathwal/flight-price-prediction?resource=download"
@@ -36,6 +36,38 @@ if page == "Introduction 📘":
 elif page == "Visualization 📊":
 
     st.subheader("Data Visualization")
+
+    # HEATMAP - price & destination city / source city
+    df2 = df[['source_city', 'destination_city', 'price']].copy()
+    heatmap_data = df2.pivot_table(index='source_city', 
+                               columns='destination_city', 
+                               values='price', 
+                               aggfunc='mean')
+    
+    # Function to format the annotations as ₹ whole numbers
+    annot = heatmap_data.applymap(lambda x: f"₹{int(round(x))}" if pd.notnull(x) else "")
+
+    plt.figure(figsize=(12, 8))
+    sns.heatmap(heatmap_data, annot=annot, fmt="", cmap="coolwarm", cbar_kws={'label': 'Price (₹)'})
+    plt.xlabel("Destination City", fontsize=12)
+    plt.ylabel("Source City", fontsize=12)
+    plt.title("Average Price from Source to Destination", fontsize=14)
+    st.pyplot(plt)
+
+    # Create the boxplot
+    fig, ax = plt.subplots()
+    sns.boxplot(x="stops", y="duration", data=df, ax=ax)
+    # Add labels and title
+    ax.set_title("Flight Duration by Number of Stops")
+    ax.set_ylabel("Flight Duration (Hours)")
+    # Display in Streamlit
+    st.pyplot(fig)
+
+
+
+elif page == "Prediction":
+
+    st.subheader("Prediction")
 
 
     
