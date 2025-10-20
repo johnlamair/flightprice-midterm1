@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 st.sidebar.title("Pages:")
-page = st.sidebar.radio("Select Page",["Introduction 📘","Visualization 📊", "Automated Report 📑","Prediction"])
+page = st.sidebar.radio("Select Page",["Introduction 📘","Visualization 📊", "Prediction"])
 
 
 st.title("✈️ Flight Price Prediction")
@@ -37,31 +37,44 @@ elif page == "Visualization 📊":
 
     st.subheader("Data Visualization")
 
-    # HEATMAP - price & destination city / source city
-    df2 = df[['source_city', 'destination_city', 'price']].copy()
-    heatmap_data = df2.pivot_table(index='source_city', 
-                               columns='destination_city', 
-                               values='price', 
-                               aggfunc='mean')
-    
-    # Function to format the annotations as ₹ whole numbers
-    annot = heatmap_data.applymap(lambda x: f"₹{int(round(x))}" if pd.notnull(x) else "")
+    airlines = ["SpiceJet", "AirAsia", "Vistara", "GO FIRST", "Indigo", "Air India"]
 
-    plt.figure(figsize=(12, 8))
-    sns.heatmap(heatmap_data, annot=annot, fmt="", cmap="coolwarm", cbar_kws={'label': 'Price (₹)'})
-    plt.xlabel("Destination City", fontsize=12)
-    plt.ylabel("Source City", fontsize=12)
-    plt.title("Average Price from Source to Destination", fontsize=14)
-    st.pyplot(plt)
+    # Create tabs
+    tabs = st.tabs(airlines)
 
-    # Create the boxplot
-    fig, ax = plt.subplots()
-    sns.boxplot(x="stops", y="duration", data=df, ax=ax)
-    # Add labels and title
-    ax.set_title("Flight Duration by Number of Stops")
-    ax.set_ylabel("Flight Duration (Hours)")
-    # Display in Streamlit
-    st.pyplot(fig)
+    for tab, airline in zip(tabs, airlines):
+        with tab:
+            st.subheader(f"Prices for {airline}")
+
+            # Filter dataframe for selected airline
+            df_airline = df[df['airline'] == airline][['source_city', 'destination_city', 'price']].copy()
+
+            if df_airline.empty:
+                st.write("No data available for this airline.")
+            else:
+                # Pivot table
+                heatmap_data = df_airline.pivot_table(
+                    index='source_city',
+                    columns='destination_city',
+                    values='price',
+                    aggfunc='mean'
+                )
+
+                # Annotate as rupees whole numbers
+                annot = heatmap_data.applymap(lambda x: f"₹{int(round(x))}" if pd.notnull(x) else "")
+
+                plt.figure(figsize=(12, 8))
+                sns.heatmap(
+                    heatmap_data,
+                    annot=annot,
+                    fmt="",
+                    cmap='coolwarm',
+                    cbar_kws={'label': 'Price (₹)'}
+                )
+                plt.xlabel("Destination City", fontsize=12)
+                plt.ylabel("Source City", fontsize=12)
+                plt.title(f"Average Price from Source to Destination ({airline})", fontsize=14)
+                st.pyplot(plt)
 
 
 
