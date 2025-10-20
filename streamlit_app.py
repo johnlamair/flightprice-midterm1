@@ -1,13 +1,20 @@
 import streamlit as st
 import pandas as pd
+import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
+from sklearn.model_selection import train_test_split
 
 st.sidebar.title("Pages:")
 page = st.sidebar.radio("Select Page", ["Introduction 📘", "Visualization 📊", "Prediction"])
 
 st.title("✈️ Flight Price Prediction")
 df = pd.read_csv("flight-price.csv")
+
+# Make a copy of df for prediction preprocessing
+df_prediction = df.copy()
 
 # column names
 df.columns = [
@@ -125,3 +132,49 @@ elif page == "Visualization 📊":
 
 elif page == "Prediction":
     st.subheader("Prediction")
+
+    # Encode categorical columns as integers
+    df_prediction["airline"] = df_prediction["airline"].astype("category").cat.codes
+    df_prediction["flight"] = df_prediction["flight"].astype("category").cat.codes
+    df_prediction["source_city"] = df_prediction["source_city"].astype("category").cat.codes
+    df_prediction["departure_time"] = df_prediction["departure_time"].astype("category").cat.codes
+    df_prediction["stops"] = df_prediction["stops"].astype("category").cat.codes
+    df_prediction["arrival_time"] = df_prediction["arrival_time"].astype("category").cat.codes
+    df_prediction["destination_city"] = df_prediction["destination_city"].astype("category").cat.codes
+    df_prediction["class"] = df_prediction["class"].astype("category").cat.codes
+
+    X = df_prediction[["airline", "flight", "source_city", "departure_time",
+                    "stops", "arrival_time", "destination_city", "class",
+                    "duration", "days_left"]]
+    y = df_prediction["price"]
+
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+    # fit linear regression
+    lr = LinearRegression()
+    lr.fit(X_train, y_train)
+
+    # --- Make predictions ---
+    y_pred = lr.predict(X_test)
+
+    # --- Metrics ---
+    mae = mean_absolute_error(y_test, y_pred)
+    rmse = np.sqrt(mean_squared_error(y_test, y_pred))
+    r2 = r2_score(y_test, y_pred)
+
+    st.subheader("Linear Regression Results")
+    st.write(f"Mean Absolute Error (MAE): ₹{mae:,.2f}")
+    st.write(f"Root Mean Squared Error (RMSE): ₹{rmse:,.2f}")
+    st.write(f"R² Score: {r2:.4f}")
+
+    # --- Visualization ---
+    st.subheader("Predicted vs Actual Prices")
+    plt.figure(figsize=(10,6))
+    plt.scatter(y_test, y_pred, alpha=0.5, color='blue')
+    plt.plot([y_test.min(), y_test.max()], [y_test.min(), y_test.max()], 'r--', lw=2)
+    plt.xlabel("Actual Price (₹)")
+    plt.ylabel("Predicted Price (₹)")
+    plt.title("Actual vs Predicted Flight Prices")
+    plt.grid(alpha=0.3)
+    st.pyplot(plt)
+    plt.close()
