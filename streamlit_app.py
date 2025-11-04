@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
+import io
 import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.linear_model import LinearRegression
@@ -35,7 +36,7 @@ if selected_page == "Introduction 📘":
     st.write("Flight booking data from Easemytrip for India's top 6 metro cities. 300,261 datapoints and 11 features.")
     st.dataframe(flight_data.head(), hide_index=True)
     st.write("Source: https://www.kaggle.com/datasets/shubhambathwal/flight-price-prediction?resource=download")
-    st.dataframe(flight_data.info)
+    st.dataframe(flight_data.describe())
 
 elif selected_page == "Visualization 📊":
     st.subheader("Data Visualization")
