@@ -168,3 +168,5 @@ elif selected_page == "Prediction":
 
 elif selected_page == "Conclusion":
     st.subheader("Conclusion")
+    st.write("Delhi generally offers cheaper flights overall, though budget airlines tend to charge more through that airport. Chennai appears the most expensive to fly from, but when considering only budget carriers, it’s actually the cheapest. Morning and evening flights are typically priciest, likely due to peak travel hours.")
+    st.write("Given more time, we would have sought a dataset that included the day and month of travel, as this information could reveal price fluctuations tied to weekends, holidays, and seasonal demand: factors that likely influence flight costs but weren’t captured here.")
