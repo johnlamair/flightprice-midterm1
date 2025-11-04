@@ -160,5 +160,5 @@ elif selected_page == "Prediction":
                 st.pyplot(plt)
                 plt.close()
 
-    elif selected_page == "Conclusion":
-        st.subheader("Conclusion")
+elif selected_page == "Conclusion":
+    st.subheader("Conclusion")
