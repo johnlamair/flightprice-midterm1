@@ -36,7 +36,12 @@ if selected_page == "Introduction 📘":
     st.write("Flight booking data from Easemytrip for India's top 6 metro cities. 300,261 datapoints and 11 features.")
     st.dataframe(flight_data.head(), hide_index=True)
     st.write("Source: https://www.kaggle.com/datasets/shubhambathwal/flight-price-prediction?resource=download")
-    st.dataframe(flight_data.describe())
+    
+    # Show info as text
+    buffer = io.StringIO()
+    flight_data.info(buf=buffer)
+    s = buffer.getvalue()
+    st.text(s)
 
 elif selected_page == "Visualization 📊":
     st.subheader("Data Visualization")
