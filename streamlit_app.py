@@ -10,7 +10,7 @@ from sklearn.preprocessing import LabelEncoder
 
 
 st.sidebar.title("Pages:")
-selected_page = st.sidebar.radio("Select Page", ["Introduction 📘", "Visualization 📊", "Prediction"])
+selected_page = st.sidebar.radio("Select Page", ["Introduction 📘", "Visualization 📊", "Prediction", "Conclusion"])
 
 st.title("✈️ Flight Price Prediction")
 flight_data = pd.read_csv("flight-price.csv")
@@ -21,6 +21,8 @@ flight_data.columns = [
 ]
 
 departure_time_order = ["Early Morning", "Morning", "Afternoon", "Evening", "Late Night"]
+
+airline_names = flight_data["Airline"].unique().tolist()
 
 if selected_page == "Introduction 📘":
     st.link_button("Github Repo", "https://github.com/johnlamair/flightprice-midterm1")
@@ -33,11 +35,11 @@ if selected_page == "Introduction 📘":
     st.write("Flight booking data from Easemytrip for India's top 6 metro cities. 300,261 datapoints and 11 features.")
     st.dataframe(flight_data.head(), hide_index=True)
     st.write("Source: https://www.kaggle.com/datasets/shubhambathwal/flight-price-prediction?resource=download")
+    st.dataframe(flight_data.info)
 
 elif selected_page == "Visualization 📊":
     st.subheader("Data Visualization")
     
-    airline_names = flight_data["Airline"].unique().tolist()
     tabs = st.tabs(["Overall"] + airline_names)
 
     for tab, airline_name in zip(tabs, ["Overall"] + airline_names):
@@ -100,7 +102,6 @@ elif selected_page == "Visualization 📊":
                 for col in df_small.select_dtypes(include=['object']).columns:
                     df_small[col] = encoded.fit_transform(df_small[col])
 
-                # compute correlation
                 corr_matrix = df_small.corr()
 
                 # plot heatmap
@@ -121,10 +122,9 @@ elif selected_page == "Prediction":
     for feature in categorical_features:
         flight_model_data[feature] = flight_model_data[feature].astype("category").cat.codes
 
-    airline_tab_names = flight_data["Airline"].unique().tolist()
-    tabs = st.tabs(airline_tab_names)
+    tabs = st.tabs(airline_names)
 
-    for tab, airline_name in zip(tabs, airline_tab_names):
+    for tab, airline_name in zip(tabs, airline_names):
         with tab:
             st.markdown(f"## Airline: {airline_name}")
             df_airline = flight_data[flight_data["Airline"] == airline_name]
@@ -159,3 +159,6 @@ elif selected_page == "Prediction":
                 plt.grid(alpha=0.3)
                 st.pyplot(plt)
                 plt.close()
+
+    elif selected_page == "Conclusion":
+        st.subheader("Conclusion")
